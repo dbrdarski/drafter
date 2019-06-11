@@ -29,6 +29,18 @@ Now let's try to mutate the state using the shorthand method.
 ```javascript
 state.b.c.d = 4
 let s2 = state();
+
+console.log(s2);
+// {
+//   a: 1,
+//   b: {
+//    c: {
+//      d: 4 }
+//    }
+// }
+//
+
+s1 === s2 // false
 ```
 
 Let's try to set ```state.a``` to 1, which is it's current value.
@@ -37,7 +49,6 @@ Let's try to set ```state.a``` to 1, which is it's current value.
 state.a = 1;
 let s3 = state();
 
-s1 === s2 // false
 s2 === s3 // true
 ```
 The last two snapshots still are the same object since no effective state was changed.
@@ -45,3 +56,24 @@ The last two snapshots still are the same object since no effective state was ch
 ```javascript
 const s2 = state();
 ```
+
+Now let's do some more complicated mutations. First add list property:
+```javascript
+state.list = [1,2,3];
+```
+For more complex changes to the state use the preferred method:
+```javascript
+state( draft => {
+  delete draft.a
+  draft.list.push(4,5);
+  draft.b.c.d = { e: 10 };
+});
+let s4 = state();
+console.log(s4);
+// {
+//   "b": {"c": {"d": {"e": 10 }}},
+//   "list": [ 1, 2, 3, 4, 5 ]
+// }
+```
+
+Keep in mind this library is still work in progress.
