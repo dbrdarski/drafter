@@ -1,4 +1,4 @@
-# drafter
+# drafter.js
 Work with immutable structures in mutable way
 
 ```javascript
