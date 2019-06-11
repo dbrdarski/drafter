@@ -1,7 +1,7 @@
 # drafter
 Work with immutable structures in mutable way
 
-```html
+```javascript
 import { createState } from 'drafter';
 
 var { state, subscribe } = createState(Object.freeze({a: 1}));
@@ -16,10 +16,10 @@ render();
 
 So let's try to mutate the state using the shorthand form.
 
-```
+```javascript
 state.b = { c: {d: 2}};
 ```
 We can get a snapshot of current state by invoking state with no arguments:
-```
+```javascript
 var s1 = state();
 ```
