@@ -1,7 +1,7 @@
 # drafter.js
 Work with immutable structures in mutable way
 
-##drafter.createState
+## drafter.createState
 draft.createState enables you to create immutable state proxy and subscribe to it for changes:
 ```javascript
 import { createState } from 'drafter';
@@ -76,7 +76,7 @@ console.log(s4);
 ```
 This will trigger the changes to the state into a single update.
 
-##drafter.produce
+## drafter.produce
 Let's take a look at the ```produce``` function:
 ```javascript
 import { produce } from 'drafter';
