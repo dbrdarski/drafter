@@ -2,7 +2,7 @@
 // TODO: Investigate: assign, deep assign.
 // TODO: Support arrays in shorthand mode
 
-const { isPrimitive, isCallable, copy, map, empty, each } = require('../utils');
+const { isPrimitive, isCallable, copy, map, empty, each } = require('./utils');
 
 const ERR_STATE_UPDATE = 'State update argument must either be an Object/Array or an update function.';
 
