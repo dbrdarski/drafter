@@ -101,9 +101,9 @@ Imagine something like this:
 this.setState( oldstate => {
   return {
     invoices: {
-      ...oldState.invoices,
+      ...oldstate.invoices,
       [id]: {
-        ...oldState.invoices[id],
+        ...oldstate.invoices[id],
         confirmed: true
       }
     }
