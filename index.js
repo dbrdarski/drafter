@@ -1,2 +1,2 @@
-const { createState } = require('./src/state')
-module.exports = { createState };
+const { createState, produce } = require('./src/state')
+module.exports = { createState, produce };

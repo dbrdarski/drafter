@@ -1,5 +1,6 @@
 // TODO: Freeze on Create State...
-// TODO: Investigate: deep freeze, deep assign.
+// TODO: Investigate: assign, deep assign.
+// TODO: Support arrays in shorthand mode
 
 const { isPrimitive, isCallable, copy, map, empty, each } = require('../utils');
 
@@ -136,6 +137,7 @@ const createProxy = (record, { handler, mutable = false } = {}) => {
 };
 
 module.exports = {
+  produce,
 	createState,
 	createProxy
 }

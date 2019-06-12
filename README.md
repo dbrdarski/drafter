@@ -1,6 +1,8 @@
 # drafter.js
 Work with immutable structures in mutable way
 
+##drafter.createState
+draft.createState enables you to create immutable state proxy and subscribe to it for changes:
 ```javascript
 import { createState } from 'drafter';
 
@@ -58,7 +60,7 @@ Now let's do some more complicated mutations. First add list property:
 ```javascript
 state.list = [1,2,3];
 ```
-For more complex changes to the state use the preferred method:
+For more complex changes to the state use an update function:
 ```javascript
 state( draft => {
   delete draft.a
@@ -72,5 +74,52 @@ console.log(s4);
 //   "list": [ 1, 2, 3, 4, 5 ]
 // }
 ```
+This will trigger the changes to the state into a single update.
 
-Keep in mind this library is still work in progress.
+##drafter.produce
+Let's take a look at the ```produce``` function:
+```javascript
+import { produce } from 'drafter';
+
+const oldState = {a: 1, list: [1, 2]};
+const newState = produce( oldState, draft => {
+  draft.a = { b: 2 };
+  draft.list.push(3);
+});
+```
+
+Currying is also supported with ```produce```:
+```javascript
+const updateFn = produce( draft => { ... });
+const newState = updateFn(oldState);
+```
+This is really handy when wokring with React ```setState``` or Redux reducers.
+
+Imagine something like this:
+```javascript
+...
+this.setState( oldstate => {
+  return {
+    invoices: {
+      ...oldState.invoices,
+      [id]: {
+        ...oldState.invoices[id],
+        confirmed: true
+      }
+    }
+  }
+});
+```
+Would simply become:
+```javascript
+...
+this.setState(
+  produce( draft => {
+    draft.invoices[id].confirmed = true;
+  })
+);
+```
+
+TODO: Redux example.
+
+NOTE: This library is still work in progress.
