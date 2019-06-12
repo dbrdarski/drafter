@@ -52,7 +52,7 @@ const curry = (f) => {
   }
 }
 
-modules.exports = {
+module.exports = {
   isPrimitive,
   isObject,
   isCallable,
