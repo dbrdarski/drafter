@@ -65,7 +65,5 @@ modules.exports = {
   reduce,
   each,
   logger,
-  hash,
-  curry,
-  Unit,
+  curry
 }
