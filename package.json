@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/dbrdarski/drafter/issues"
   },
-  "homepage": "https://github.com/dbrdarski/drafter#readme"
+  "homepage": "https://github.com/dbrdarski/drafter#readme",
+  "devDependencies": {
+    "jest": "^24.8.0"
+  }
 }

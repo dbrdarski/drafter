@@ -50,7 +50,7 @@ const subProxy = (subarray, prop, subproxies, { handler, mutable }) => {
 		subproxies[prop] = createProxy(subarray, {
 			handler,
 			mutable
-		});
+2		});
 	}
 	return subproxies[prop];
 };
@@ -147,5 +147,7 @@ const createProxy = (record, { handler, mutable = false } = {}) => {
 module.exports = {
   produce,
 	createState,
-	createProxy
+	createProxy,
+	stateGuard,
+	subProxy
 }
