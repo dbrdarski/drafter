@@ -2,7 +2,7 @@
 // TODO: Investigate: assign, deep assign.
 // TODO: Support arrays in shorthand mode
 
-const { isPrimitive, isCallable, copy, map, empty, each } = require('./utils');
+const { isPrimitive, isObject, isCallable, copy, map, empty, each } = require('./utils');
 
 const ERR_STATE_UPDATE = 'State update argument must either be an Object/Array or an update function.';
 
@@ -102,6 +102,7 @@ const createProxy = (record, { handler, mutable = false } = {}) => {
 				// mutable ||
 				handler && handler(record);
 			}
+			return true;
 		},
 		deleteProperty: (target, prop) => {
 			if( record.hasOwnProperty(prop) ){
@@ -121,11 +122,18 @@ const createProxy = (record, { handler, mutable = false } = {}) => {
 					map(record, applyToObjectKeys(proxy));
 				}
 				return record;
-			} else if (args.length === 1){
-				const [stateUpdate] = args;
+			} else {
+				const [stateUpdate, options] = args;
 				if (isCallable(stateUpdate)){
 					const p = createProxy(record, { mutable: true });
 					stateUpdate(p);
+					record = p();
+					state = stateGuard(record, { mutable });
+					handler && handler(record);
+					return proxy;
+				} else if (isObject(stateUpdate)){
+					const p = createProxy(record, { mutable: true });
+					Object.assign(p, stateUpdate);
 					record = p();
 					state = stateGuard(record, { mutable });
 					handler && handler(record);
