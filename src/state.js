@@ -15,14 +15,23 @@ const createState = (state = {}, options) => {
 	let listeners = [];
 	const subscribe = (fn) => { listeners = listeners.concat(fn) };
 	const unsubscribe = (fn) => { listeners = listeners.filter(l => l != fn) };
-	const handler = ( state ) => {
+	// const handler = ( stateUpdate ) => {
+	// const handler = ( state ) => {
+	const handler = () => {
 		listeners.map(
-			(fn) => fn({state})
+			(fn) => fn({ state })
 		);
 	};
 	const observer = createProxy(state, { handler, mutable });
+	const getState = () => observer();
+	const setState = (stateUpdate) => {
+		if(isPrimitive(stateUpdate)) throw new Error(ERR_STATE_UPDATE);
+		return observer(stateUpdate);
+	}
 	return {
-		state: observer,
+		$state: observer,
+		getState,
+		setState,
 		subscribe,
 		unsubscribe
 	};
@@ -50,7 +59,7 @@ const subProxy = (subarray, prop, subproxies, { handler, mutable }) => {
 		subproxies[prop] = createProxy(subarray, {
 			handler,
 			mutable
-2		});
+		});
 	}
 	return subproxies[prop];
 };
