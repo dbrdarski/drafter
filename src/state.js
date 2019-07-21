@@ -13,7 +13,10 @@ const stateDefaults = {
 const createState = (state = {}, options) => {
 	const { mutable } = { ...stateDefaults, ...options };
 	let listeners = [];
-	const subscribe = (fn) => { listeners = listeners.concat(fn) };
+	const subscribe = (fn) => {
+		listeners = listeners.concat(fn);
+		return () => listeners = listeners.filter(l => l != fn)
+	};
 	const unsubscribe = (fn) => { listeners = listeners.filter(l => l != fn) };
 	// const handler = ( stateUpdate ) => {
 	// const handler = ( state ) => {
