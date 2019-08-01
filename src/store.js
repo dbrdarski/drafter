@@ -1,142 +1,53 @@
-import { isCallable, isObject, empty, reduce } from './utils';
+import { isCallable, isObject, empty, map, reduce } from './utils';
+import { createObservable } from './observable';
 import { createState } from './state';
 import { dispatch } from './dispatch';
 
 const id = x => x;
 
-const connectStore = (componentInstance) => (store, mapper) => {
+export const connectStoreFactory = ($instance) => (Store, mapper) => {
+  const store = new Store;
+  const mapFn = mapper ? resolveMapper(mapper) : false;
 
-};
-
-const componentInstance = () => {
-  const instance = {
-    attrs: { },
-  };
-  const methods = Object.defineProperties({ }, {
-    createState: { get(){ } },
-    createEffect: { get(){ } },
-    connectStore: { get(){ } },
-    mix: { get(){ } }
+  store.subscribe((state) => {
+    if(mapper)
+      state = mapFn(state);
+    $instance[Store.name] = (state);
   });
 
-  const { $state, subscribe } = createState(instance, { mutable: true });
-  return {
-    $state,
-    subscribe,
-    methods
-  };
-}
+  store.getState(); // this will not work for re-initialized components
+};
 
-const mountComponent = (component) => {
-  let cache;
-  const clearCache = () => { cache = null };
-  const { $state, subscribe, methods } = componentInstance();
-  const render = component(methods);
-  const unsubscribe = subscribe(clearCache);
-
-  // return (vnode) => {
-  //   if (cache == null){
-  //     cache = render($state());
-  //   }
-  //   return cache;
-  // };
-
-  return {
-    render(vnode){
-      if (cache == null){
-        cache = render($state());
-      }
-      return cache;
-    }
-    unmount(){
-      unsubscribe();
-    }
-  }
-}
-
-const resolveMapper = (mapper) => {
+export const resolveMapper = (mapper) => {
   if (isCallable(mapper)){
-    return (state) => mapper(state);
+    return mapper;
   } else if (Array.isArray(mapper)) {
     return (state) => {
       const s = empty(state);
-      mapper.forEach( key => s[key] = state[key]);
-      return Object.freeze(s);
+      mapper.forEach( key => {
+        s[key] = state[key];
+      });
+      return s;
     };
   } else {
     return id;
   }
 };
 
-const Store = (klass) => {
-	const instance = new klass;
-  const { subscribe, $state } = createState(instance);
+export const Store = (name, { state, methods, computed }) => {
+  const {$state, getState, ...stateProxy} = createState(state);
+  const $methods = map(methods, method => ({ value: method.bind($state) }));
+  const { message, subscribe, unsubscribe } = createObservable();
 
-  let listeners = [];
+  class Store { };
+  Store.toString = () => name;
+  Object.assign(Store.prototype, { subscribe, unsubscribe, getState });
+  Object.defineProperties(Store, {
+    ...$methods,
+    name: { value: name, enumerable: false }
+  });
 
-  const methods = reduce(klass.prototype, (acc, method => {
-    isCallable(method) && acc.push(method.bind($state));
-    return acc;
-  }, []);
+  stateProxy.subscribe(message);
 
-  const push = (state) => {
-    listeners.forEach((fn) => {
-      fn(state, methods);
-    });
-  };
-
-  subscribe(push);
-  subscribe(dispatch);
-
-	return class {
-		constructor(){
-			return instance;
-		}
-		static toString(){
-			return klass.toString();
-		}
-    static subscribe(fn){
-      this.listeners = this.listeners.concat(fn);
-      return () => {
-        this.listeners = this.listeners.filter((f) => f !== fn);
-      }
-    }
-    static unsubscribe(fn){
-      this.listeners = this.listeners.filter((f) => f !== fn);
-    }
-	}
-}
-
-
-
-class VAT extends Store {
-  VATRate = 0;
-  VATAmount = 0;
-  setVATAmount(value){
-    this.VATAmount = value;
-  }
-  setVATRate(value){
-    this.VATRate = value;
-  }
-}
-
-const Store = (klass) => {
-  const defaultState = Object.assign({ }, new klass);
-  const { subscribe, getState, $state } = createState(defaultState, { mutable: true });
-  subscribe(dispatch);
-  const proto = reduce(klass.prototype, (acc, method => {
-    isCallable(method) && acc.push(method.bind($state));
-    return acc;
-  }, []);
-  return
-  return {
-    getState: () => ,
-    subscribe
-  }
-}
-
-const connector = (component) => (store, mapper) => {
-  component.props[store.name] = ()
-}
-
-const connectStore = (componentInstance) => (store) => defaultState
+  return Store;
+};
