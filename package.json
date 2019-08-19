@@ -1,7 +1,7 @@
 {
   "name": "drafter",
   "version": "0.0.1",
-  "description": "Work with imutable data using mutable \u001b[1;5D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[C\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[Dm\u001b[2~utable date in mutable manner",
+  "description": "Work with imutable data structures in mutable manner",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -13,7 +13,13 @@ const stateDefaults = {
 const createState = (state = {}, options) => {
 	const { mutable } = { ...stateDefaults, ...options };
 	const { message, subscribe, unsubscribe } = createObservable();
-	const stateProxy = createProxy(state, { message, mutable });
+	const handler = (stateUpdate) => {
+		if (stateUpdate !== state) {
+			state = stateUpdate;
+			message(state);
+		}
+	}
+	const stateProxy = createProxy(state, { handler, mutable });
 	const getState = () => stateProxy();
 	const setState = (stateUpdate) => {
 		if(isPrimitive(stateUpdate)) throw new Error(ERR_STATE_UPDATE);
@@ -45,10 +51,10 @@ const apply = (fn) => fn();
 const applyToObjectKeys = (proxy) => (v, k) => isPrimitive(v) || proxy[k]();
 
 
-const subProxy = (subarray, prop, subproxies, { message, mutable }) => {
+const subProxy = (subarray, prop, subproxies, { handler, mutable }) => {
 	if (!subproxies.hasOwnProperty(prop)) {
 		subproxies[prop] = createProxy(subarray, {
-			message,
+			handler,
 			mutable
 		});
 	}
@@ -62,7 +68,7 @@ const produce = (...args) => {
 		return createProxy(first)(second)()
 	}
 }
-const createProxy = (record, { message, mutable = false } = {}) => {
+const createProxy = (record, { handler, mutable = false, env = {}} = {}) => {
 	let proxy,
 			subproxies = {},
 			state = stateGuard(record, { mutable });
@@ -83,10 +89,12 @@ const createProxy = (record, { message, mutable = false } = {}) => {
 			if (record.hasOwnProperty(prop)) {
 				const p = record[prop];
 				return isPrimitive(p)
-					? p
+					? env.isRenderMode
+						? () => p
+						: p
 					: subProxy(p, prop, subproxies, {
 						mutable,
-						message: (record) => parent[prop] = record
+						handler: (record) => parent[prop] = record
 					});
 			} else if (isArray && mutable && mutators.hasOwnProperty(prop)) {
 				return mutators[prop];
@@ -98,9 +106,9 @@ const createProxy = (record, { message, mutable = false } = {}) => {
 			if(!record.hasOwnProperty(prop) || record[prop] !== value){
 				record = state();
 				record[prop] = value;
-				delete subproxies[prop];
+				// delete subproxies[prop];
 				// mutable ||
-				message && message(record);
+				handler && handler(record);
 			}
 			return true;
 		},
@@ -110,13 +118,13 @@ const createProxy = (record, { message, mutable = false } = {}) => {
 				delete record[prop];
 				delete subproxies[prop];
 				// mutable ||
-				message && message(record);
+				handler && handler(record);
 			}
 		},
 		apply: ( target, thisArg, args ) => {
 			if(!args.length){
 				Object.freeze(record);
-				message && message(record);
+				handler && handler(record);
 				if (mutable) {
 					state = stateGuard(record);
 					map(record, applyToObjectKeys(proxy));
@@ -129,14 +137,14 @@ const createProxy = (record, { message, mutable = false } = {}) => {
 					stateUpdate(p);
 					record = p();
 					state = stateGuard(record, { mutable });
-					message && message(record);
+					handler && handler(record);
 					return proxy;
 				} else if (isObject(stateUpdate)){
 					const p = createProxy(record, { mutable: true });
 					Object.assign(p, stateUpdate);
 					record = p();
 					state = stateGuard(record, { mutable });
-					message && message(record);
+					handler && handler(record);
 					return proxy;
 				}
 			}
